@@ -7,14 +7,18 @@ from selenium.webdriver.support import expected_conditions as EC
 from os import path, environ, makedirs
 import time
 
+[Environment]::SetEnvironmentVariable("username", "ETFCAP1", "User")
+[Environment]::SetEnvironmentVariable("password", "Password2", "User")
+
+
 
 def get_file_from_compass():
     """
     Downloads a file from the NBCN Compass system.
     Requires environment variables 'username' and 'password' to be set.
     """
-    if 'username' not in environ or 'password' not in environ:
-        raise EnvironmentError("Environment variables 'username' and 'password' must be set.")
+    # if 'username' not in environ or 'password' not in environ:
+    #     raise EnvironmentError("Environment variables 'username' and 'password' must be set.")
     
     download_dir = path.abspath("downloads")
     if not path.exists(download_dir):
@@ -31,8 +35,8 @@ def get_file_from_compass():
         driver.set_window_size(710, 920)
         driver.get("https://filecabinet.nbcn.ca/")
         wait = WebDriverWait(driver, 20)
-        wait.until(EC.presence_of_element_located((By.NAME, "userid"))).send_keys(environ['username'])
-        wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(environ['password'])
+        wait.until(EC.presence_of_element_located((By.NAME, "userid"))).send_keys('ETFCAP1')
+        wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys('Password2')
         wait.until(EC.element_to_be_clickable((By.NAME, "SUBMIT"))).click()
         wait.until(EC.element_to_be_clickable((By.ID, "downloadButton0"))).click()
         wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Logout"))).click()
