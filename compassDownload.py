@@ -7,10 +7,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from os import path, environ, makedirs
 import time
 
-[Environment]::SetEnvironmentVariable("username", "ETFCAP1", "User")
-[Environment]::SetEnvironmentVariable("password", "Password2", "User")
-
-
 
 def get_file_from_compass():
     """
