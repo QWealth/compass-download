@@ -17,8 +17,8 @@ def get_file_from_compass():
     Requires environment variables 'username' and 'password' to be set.
     """
 
-    username = environ.get('username', 'ETFCAP1')
-    password = environ.get('password', 'Password2')
+    username = 'ETFCAP1'
+    password = 'Password2'
 
     if not path.exists(DOWNLOAD_DIR):
         makedirs(DOWNLOAD_DIR)
