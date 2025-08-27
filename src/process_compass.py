@@ -24,7 +24,7 @@ def unzip_file(zip_file, base_dir=DOWNLOADS_FOLDER):
         with ZipFile(zip_file_path, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
         print(f"Successfully extracted: '{extract_dir}'")
-        for item in path.listdir(extract_dir):
+        for item in listdir(extract_dir):
             s = path.join(extract_dir, item)
             d = path.join(DESTINATION_FOLDER, item)
             shutil.move(s, d)
