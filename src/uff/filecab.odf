@@ -1,0 +1,977 @@
+/* File Cabinet Output Definition File 
+   CopyRight 2006 National Bank Financial
+   Modified July, August 2000 to accommodate new format names (SP100T80, SD700T80)
+   Modified September 2002 to accommodate new format name(SD700PRA)
+   Updated September 2003 - account number added to SP100T80 extract in segments
+   DADPL and DADGP to provide foreign key link to accounts table.
+   Updated October 2004 - column PAYMENT-ID added to segment DADGP
+   			- column RISK-TOLERANCE added to segment DCLRT
+   			- External system information segment DCLOZ added 
+   Updated September 2006 to accommodate new format name SP399T80.
+        - columns added to segment DPSDT:
+          DPSDT58 17 numeric (2 decimals);     Trade Date Book Value
+          DPSDT59 17 numeric (2 decimals);     CCTC
+          DPSDT60 15 numeric (no decimals);    Settle (Value)Date Quantity
+          DPSDT61 17 numeric (2 decimals);     Settle (Value)Date Amount
+	  DPSDT62 17 numeric (2 decimals);     Settle (Value)Date Book Value                                      
+   Updated September 2006 to accommodate new format name SP202
+   which adds the Cost Movement Segment DPSCM to the standard SP200 extract.
+   Updated January 2009 to accommodate new Format SD7PRAOC and changed fields DSDRT63 and DSDSY43. (APM1235)
+        - replace format name SD700PRA to SD7PRAOC
+        - replace columns in segment DSDRT, format SD700, SD700T80, SD7PRAOC 
+          DSDRT51 to DSDRT63 numeric (field length expands from CW 12 to CW 26)
+       	- replace columns in segment DSDSY, format SD700, SD700T80, SD7PRAOC
+          DSDSY03 to DSDSY43 numeric (field length expands from VBW 12 to VBW 26)        
+   Updated March 2009 to accommodate new Format SD7PRAOC and changed fields DSDRT63 and DSDSY43. (APM1235)
+        - replace format name SD7PRAOC to SD700PR1
+   Updated June 2009 to be compliant to uffconverter program v1.5.9. (APM1235)
+        - replace dashes ("-") in field names to underscores ("_")
+   Updated Aug 2011 for a SIS SD700 reformat issue (UOM) issue
+        - replace DSDRT.DSDRT03 with DSDPP.DSDPP03 
+   Updated March 2012 to correct Aug 2011 change
+	- replace DSDPP.DSDPP03 with DSDRT.DSDRT03 excluding UOM and DPP
+	
+   Updated August 2015 - CRM2 changes
+   	- OLD        NEW
+	- SP100 > unchanged
+	- SP200 > unchanged
+	- SP399D > SP399CRM
+	- SD700PR1 > unchanged
+
+   	- SP100 - No changes
+   	- SP200 - Additional field "TXN_BV_MV_IND"
+   	- SP399 - Additional field "TXN_BV_MV_IND"
+   	- SP399D - Additional field "TXN_BV_MV_IND"
+   	- SD700 - Additional fields listed below...
+   	   "PRO_DTE"
+	   "BKR_ID"
+	   "EFF_DTE"
+	   "EXP_DTE"
+	   "RBG_ID"
+	   "NDP_IND"
+	   "BKR_OVR_IND"
+	   "AUD_USR_ID"
+
+*/
+
+
+format SP100
+/* SP100 file 
+   Defines the output format for the SP100 Account Profile
+   *********************************************************************
+*/
+{
+
+//      Output account information to file accts.txt after each instance of the DADRT segment
+//  
+
+	output DADRT to "accts.txt"
+	{
+		column	DADRT.DADRT03 => "txtAcctNo";
+		column	DADRT.DADRT06 => "txtAcctType";
+		column	DADRT.DADRT09 => "txtAcctCur";
+		column	DADRT.DADRT12 => "txtAcctRR";
+		column	DADRT.DADRT30 => "txtAcctSName";
+	}
+
+// Output client information to file clients.txt after each instance of the DCLRT segment
+//
+
+	output DCLRT to "clients.txt"
+	{
+		column DCLRT.UPDCODE => "txtActionCode";
+		column DCLRT.DCLRT03 => "txtClientId";
+		column DCLRT.DCLRT06 => "txtLangCode";
+		column DCLRT.DCLRT09 => "txtClientSName";
+		column DCLRT.DCLRT12 => "txtResCode";
+		column DCLRT.DCLRT05 => "txtHPhone";
+		column DCLRT.DCLRT15 => "txtBPhone";
+		column DCLRT.DCLRT18 => "lngSIN";
+		column DCLRT.DCLRT21 => "dteBirthDate";
+		column DCLRT.DCLRT24 => "txtOccupation";
+		column DCLRT.DCLRT27 => "txtRRCode";
+		column DCLRT.DCLRT30 => "txtNetWorth";
+		column DCLRT.DCLRT33 => "txtInvObjCode1";
+		column DCLRT.DCLRT36 => "txtInvObjCode2";
+		column DCLRT.DCLRT39 => "txtInvObjCode3";
+		column DCLRT.DCLRT42 => "txtInvObjCode4";
+		column DCLRT.DCLRT45 => "txtInvObjCode5";
+		column DCLRT.DCLRT48 => "txtInvObjCode6";
+		column DCLRT.DCLRT51 => "txtGenderCode";
+		column DCLRT.DCLRT54 => "txtIncome";
+		column DCLRT.DCLRT57 => "txtNALine1";
+		column DCLRT.DCLRT60 => "txtNALine2";
+		column DCLRT.DCLRT63 => "txtNALine3";
+		column DCLRT.DCLRT66 => "txtNALine4";
+		column DCLRT.DCLRT69 => "txtNALine5";
+		column DCLRT.DCLRT72 => "txtNALine6";
+		column DCLRT.DCLRT75 => "txtNALine7";
+		column DCLRT.DCLRT78 => "txtNALine8";
+		column DCLRT.DCLRT81 => "txtPostalCode";
+	}
+
+// Output account-client cross reference information to file acclts.txt after each instance of the DCLCT segment
+//
+	output DCLCT to "acclts.txt"
+	{
+		column 	DCLCT.DCLCT03 => "txtClientId";
+		column	DADRT.DADRT03 => "txtAcctNo";
+	}
+}
+
+format SP100T80
+/* SP100 file 
+   Defines the output format for the SP100 Account Profile.  Incorporates new data segments and fields.
+   **************************************************************************************************
+*/
+{
+
+//      Output account information to file accts.txt after each instance of the DADRT segment
+//  
+
+	output DADRT to "accts.txt"
+	{
+		column	DADRT.DADRT03 => "txtAcctNo";
+		column	DADRT.DADRT06 => "txtAcctType";
+		column	DADRT.DADRT09 => "txtAcctCur";
+		column	DADRT.DADRT12 => "txtAcctRR";
+		column	DADRT.DADRT30 => "txtAcctSName";
+		column	DADRT."PLANNING_CODE"	=> "txtPlanningCode";
+		column	DADRT."ACCT_SERV_CD"	=> "txtAccountServiceCode";
+ 		column	DADRT."EMP_GRP_CD"	=> "txtEmployerGroupCode";
+ 		column  DADRT."CLOSE_DATE"      => "dteCloseDate";
+		
+	}
+
+// Output client information to file clients.txt after each instance of the DCLRT segment
+//
+
+	output DCLRT to "clients.txt"
+	{
+		column DCLRT.UPDCODE => "txtActionCode";
+		column DCLRT.DCLRT03 => "txtClientId";
+		column DCLRT.DCLRT06 => "txtLangCode";
+		column DCLRT.DCLRT09 => "txtClientSName";
+		column DCLRT.DCLRT12 => "txtResCode";
+		column DCLRT.DCLRT05 => "txtHPhone";
+		column DCLRT.DCLRT15 => "txtBPhone";
+		column DCLRT.DCLRT18 => "lngSIN";
+		column DCLRT.DCLRT21 => "dteBirthDate";
+		column DCLRT.DCLRT24 => "txtOccupation";
+		column DCLRT.DCLRT27 => "txtRRCode";
+		column DCLRT.DCLRT30 => "txtNetWorth";
+		column DCLRT.DCLRT33 => "txtInvObjCode1";
+		column DCLRT.DCLRT36 => "txtInvObjCode2";
+		column DCLRT.DCLRT39 => "txtInvObjCode3";
+		column DCLRT.DCLRT42 => "txtInvObjCode4";
+		column DCLRT.DCLRT45 => "txtInvObjCode5";
+		column DCLRT.DCLRT48 => "txtInvObjCode6";
+		column DCLRT.DCLRT51 => "txtGenderCode";
+		column DCLRT.DCLRT54 => "txtIncome";
+		column DCLRT.DCLRT57 => "txtNALine1";
+		column DCLRT.DCLRT60 => "txtNALine2";
+		column DCLRT.DCLRT63 => "txtNALine3";
+		column DCLRT.DCLRT66 => "txtNALine4";
+		column DCLRT.DCLRT69 => "txtNALine5";
+		column DCLRT.DCLRT72 => "txtNALine6";
+		column DCLRT.DCLRT75 => "txtNALine7";
+		column DCLRT.DCLRT78 => "txtNALine8";
+		column DCLRT.DCLRT81 => "txtPostalCode";
+		column DCLRT."RISK_TOLERANCE" => "txtRiskTolerance";  // 5x 4char field
+	}
+
+// Output account-client cross reference information to file acclts.txt after each instance of the DCLCT segment
+//
+	output DCLCT to "acclts.txt"
+	{
+		column 	DCLCT.DCLCT03 => "txtClientId";
+		column	DADRT.DADRT03 => "txtAcctNo";
+	}
+/*	New segments implemented for Correspondent use in 2001
+	Note that there may be zero to three iterations of segment DADGP
+*/	
+	output DADPL to "actpln.txt"
+	{
+		column	DADRT.DADRT03            => "txtAcctNo";
+		column	DADPL."PENSION_ORIGIN"	=> "txtPensionOrigin";
+	}
+	
+	output DADGP to "payments.txt"
+	{
+		column DADRT.DADRT03             => "txtAcctNo";
+		column DADGP."INSTITUTION"       => "txtInstitution";
+		column DADGP."BANK_BRANCH"       => "txtBankBranch";
+		column DADGP."BANK_ACCOUNT_NUM"  => "txtBankAcctNo";
+		column DADGP."PAYMENT_ID"	 => "txtPaymentId";
+	}
+	
+	output DCLOZ to "externid.txt"
+	{
+		column DADRT.DADRT03            => "txtAcctNo";
+		column DCLOZ."EXTERNAL_SYSTEM"	=> "txtExtrnSys";
+		column DCLOZ."EXTERNAL_SUB_SYS" => "txtExtrnSubSys";
+		column DCLOZ."EXTERNAL_ID"	=> "txtExtrnId";
+	}
+}
+
+
+
+format SP200
+/* SP200 file
+   Defines the output format for the SP200 Transaction Details File
+*/
+
+{
+// Output account position details to file posdt.txt after each instance of the DPSDT segment
+//
+	output DPSDT to "posdt.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT51	=> "txtAcctNo";
+		column DPSDT.DPSDT54	=> "txtSecId";
+		column DPSDT.DPSDT03	=> "dteValueDate";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSDT.DPSDT09	=> "dteTradeDate";
+		column DPSDT.DPSDT12	=> "booQtyValid";
+		column DPSDT.DPSDT15	=> "booAmtValid";
+		column DPSDT.DPSDT18	=> "booTradeItem";
+		column DPSDT.DPSDT21	=> "booExchItem";
+		column DPSDT.DPSDT24	=> "booRevItem";
+		column DPSDT.DPSDT27	=> "txtEntryType";
+		column DPSDT.DPSDT30	=> "txtEntryDesc";
+		column DPSDT.DPSDT39	=> "intQuantity";
+		column DPSDT.DPSDT42	=> "dblNetAmt";
+		column DPSDT.DPSDT45	=> "dblPrice";
+		column DPSDT.DPSDT48	=> "txtCur";
+	}
+
+	output DPSLI to "posli.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSLI.DPSLI03	=> "txtLIType";
+		column DPSLI.DPSLI06	=> "dblLIAmt";
+		column DPSLI.DPSLI09	=> "txtLICur";
+
+	}
+
+	output DPSTD to "postd.txt"	
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSTD.DPSTD02	=> "txtMarket";
+		column DPSTD.DPSTD03	=> "dblFXRate";
+		column DPSTD.DPSTD06	=> "booCxlTrade";
+	}
+
+	output DPSTL to "postl.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSTL.DPSTL03	=> "txtTrailer";	
+	}
+}
+
+format SP200T80
+/* SP200 file
+   Defines the output format for the SP200 Transaction Details File
+   Modified Nov 2015 for CRM2
+*/
+
+{
+// Output account position details to file posdt.txt after each instance of the DPSDT segment
+//
+	output DPSDT to "posdt.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT51	=> "txtAcctNo";
+		column DPSDT.DPSDT54	=> "txtSecId";
+		column DPSDT.DPSDT03	=> "dteValueDate";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSDT.DPSDT09	=> "dteTradeDate";
+		column DPSDT.DPSDT12	=> "booQtyValid";
+		column DPSDT.DPSDT15	=> "booAmtValid";
+		column DPSDT.DPSDT18	=> "booTradeItem";
+		column DPSDT.DPSDT21	=> "booExchItem";
+		column DPSDT.DPSDT24	=> "booRevItem";
+		column DPSDT.DPSDT27	=> "txtEntryType";
+		column DPSDT.DPSDT30	=> "txtEntryDesc";
+		column DPSDT.DPSDT39	=> "intQuantity";
+		column DPSDT.DPSDT42	=> "dblNetAmt";
+		column DPSDT.DPSDT45	=> "dblPrice";
+		column DPSDT.DPSDT48	=> "txtCur";
+		column DPSDT.TXN_BV_MV_IND	=> "txtBVtoMV";
+	}
+
+	output DPSLI to "posli.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSLI.DPSLI03	=> "txtLIType";
+		column DPSLI.DPSLI06	=> "dblLIAmt";
+		column DPSLI.DPSLI09	=> "txtLICur";
+	}
+
+	output DPSTD to "postd.txt"	
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSTD.DPSTD02	=> "txtMarket";
+		column DPSTD.DPSTD03	=> "dblFXRate";
+		column DPSTD.DPSTD06	=> "booCxlTrade";
+  		column DPSTD."DPSTD_BUY_SELL_IND"  => "booBuySell";
+		column DPSTD."DPSTD_MULTIFIL_IND"  => "booMultiFill";
+  		column DPSTD."DPSTD_EMP_DISC_IND"  => "booEmpDiscount";
+  		column DPSTD."DPSTD_QSSP_COV_IND"  => "booQSSPCoverage";
+  		column DPSTD."DPSTD_REG_REP"       => "txtRRCode";
+  		column DPSTD."DPSTD_TRADE_BASIS"   => "txtTradeBasis";
+  		column DPSTD."DPSTD_TRADE_NO"      => "txtTradeNumber";
+  		column DPSTD."DPSTD_SPCL_TAX_CDE"  => "txtSpecialTaxCode";
+  		column DPSTD."DPSTD_BC_FEE_CODE"   => "txtBCFeeCode";
+		column DPSTD."DPSTD_SUB_LOCN_CDE" => "txtSubmittingLoc";
+  		column DPSTD."DPSTD_INV_CODE"      => "txtInventoryCode";
+  		column DPSTD."DPSTD_ACCT_NO"       => "txtAccountNumber";
+  		column DPSTD."DPSTD_PRICE_FUNDS"   => "txtFundsOfPrice";
+  		column DPSTD."DPSTD_TRADE_CODE"    => "txtTradeCode";
+		column DPSTD."ORIG_TRD_ACCT"       => "txtOrigTradeAcct";  
+		
+	}
+  	
+	output DPSFL to "multfill.txt"
+	{
+		column DPSDT.DPSDT 	       => "intSeqNo";
+		column DPSDT.DPSDT06	       => "dteProcessDate";
+		column DPSTD."DPSTD_TRADE_NO"  => "txtTradeNumber";
+		column DPSFL."DPSFL_QUANTITY"  => "intFillQty";
+		column DPSFL."DPSFL_SEC_PRICE" => "dblFillPrice";
+		column DPSFL."DPSFL_FUNDS"     => "txtFillFunds";
+			
+	}
+  
+	output DPSTL to "postl.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSTL.DPSTL03	=> "txtTrailer";	
+	}
+}
+
+
+format SP202   
+/* Modified SP200 file
+   Defines the output format for the SP200 Transaction Details File
+   Segment DPSCM - Cost Movement added to standard SP200 extract
+   Added September 2006.
+*/
+
+{
+// Output account position details to file posdt.txt after each instance of the DPSDT segment
+//
+	output DPSDT to "posdt.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT51	=> "txtAcctNo";
+		column DPSDT.DPSDT54	=> "txtSecId";
+		column DPSDT.DPSDT03	=> "dteValueDate";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSDT.DPSDT09	=> "dteTradeDate";
+		column DPSDT.DPSDT12	=> "booQtyValid";
+		column DPSDT.DPSDT15	=> "booAmtValid";
+		column DPSDT.DPSDT18	=> "booTradeItem";
+		column DPSDT.DPSDT21	=> "booExchItem";
+		column DPSDT.DPSDT24	=> "booRevItem";
+		column DPSDT.DPSDT27	=> "txtEntryType";
+		column DPSDT.DPSDT30	=> "txtEntryDesc";
+		column DPSDT.DPSDT39	=> "intQuantity";
+		column DPSDT.DPSDT42	=> "dblNetAmt";
+		column DPSDT.DPSDT45	=> "dblPrice";
+		column DPSDT.DPSDT48	=> "txtCur";
+	}
+
+	output DPSLI to "posli.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSLI.DPSLI03	=> "txtLIType";
+		column DPSLI.DPSLI06	=> "dblLIAmt";
+		column DPSLI.DPSLI09	=> "txtLICur";
+	}
+
+	output DPSTD to "postd.txt"	
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSTD.DPSTD02	=> "txtMarket";
+		column DPSTD.DPSTD03	=> "dblFXRate";
+		column DPSTD.DPSTD06	=> "booCxlTrade";
+	}
+
+	output DPSTL to "postl.txt"
+	{
+		column DPSDT.DPSDT 	=> "intSeqNo";
+		column DPSDT.DPSDT06	=> "dteProcessDate";
+		column DPSTL.DPSTL03	=> "txtTrailer";	
+	}
+	
+	//  - Cost Movement Segment DPSCM added Sept 2006.
+	output DPSCM to "costmv.txt"
+	{
+	        column DPSDT.DPSDT 	=> "intSeqNo";
+	        column DPSCM.DPSCM03    => "dblCostMovAmt";
+	        column DPSCM.DPSCM06    => "dblGainLossAmt";
+	}
+}
+
+
+
+format SP399
+// Defines the output format for the SP399 Reconciliation File
+
+{
+	output DPSDT to "recon.txt"
+	{
+		file ProcessingDate     => "dteProcessDate";
+		column DPSDT.DPSDT51	=> "txtAcctNo";
+		column DPSDT.DPSDT54	=> "txtSecId";
+		column DPSDT.DPSDT12	=> "booQtyValid";
+		column DPSDT.DPSDT15	=> "booAmtValid";
+		column DPSDT.DPSDT39	=> "dblQuantity";
+		column DPSDT.DPSDT42	=> "dblAmount";
+	}
+}
+
+format SP399D
+// Defines the output format for the SP399 Daily Reconciliation File
+{
+	output DPSDT to "recon.txt"
+	{
+		file ProcessingDate     => "dteProcessDate";
+		column DPSDT.DPSDT51	=> "txtAcctNo";
+		column DPSDT.DPSDT54	=> "txtSecId";
+		column DPSDT.DPSDT12	=> "booQtyValid";
+		column DPSDT.DPSDT15	=> "booAmtValid";
+		column DPSDT.DPSDT39	=> "dblQuantity";
+		column DPSDT.DPSDT42	=> "dblAmount";
+	}
+	output DPSED to "dlyeval.txt"
+	{
+		file ProcessingDate              => "dteProcessDate";
+		column DPSDT.DPSDT51	         => "txtAcctNo";
+		column DPSED."DPSED_TD_MKT_VAL"  => "dblTDMarketVal";
+		column DPSED."DPSED_TD_LOAN_VAL" => "dblTDLoanVal";
+		column DPSED."DPSED_TD_REQ_MGN"  => "dblTDReqMgn";
+		column DPSED."DPSED_TD_REQ_SEC"  => "dblTDReqSec";
+		column DPSED."DPSED_VD_MKT_VAL"  => "dblVDMarketVal";
+		column DPSED."DPSED_VD_LOAN_VAL" => "dblVDLoanVal";
+		column DPSED."DPSED_VD_REQ_MGN"  => "dblVDReqMgn";
+		column DPSED."DPSED_VD_REQ_SEC"  => "dblVDReqSec";
+		column DPSED."DPSED_CURR_VD_BAL" => "dblVDBal";
+		column DPSED."DPSED_CURR_TD_BAL" => "dblTDBal";
+	}
+	
+}
+
+format SP399T80
+// Defines the output format for the new T80-specific SP399 Daily Reconciliation File
+{
+	output DPSDT to "recon.txt"
+	{
+		file ProcessingDate     => "dteProcessDate";
+		column DPSDT.DPSDT51	=> "txtAcctNo";
+		column DPSDT.DPSDT54	=> "txtSecId";
+		column DPSDT.DPSDT12	=> "booQtyValid";
+		column DPSDT.DPSDT15	=> "booAmtValid";
+		column DPSDT.DPSDT39	=> "dblQuantity";
+		column DPSDT.DPSDT42	=> "dblAmount";
+		column DPSDT.DPSDT58	=> "dblTDBookVal";
+		column DPSDT.DPSDT59	=> "dblCCTC";
+		column DPSDT.DPSDT60	=> "intVDQty";
+		column DPSDT.DPSDT61	=> "dblVDAmount";
+		column DPSDT.DPSDT62    => "dblVDBookVal";
+	}
+	output DPSED to "dlyeval.txt"
+	{
+		file ProcessingDate              => "dteProcessDate";
+		column DPSDT.DPSDT51	         => "txtAcctNo";
+		column DPSED."DPSED_TD_MKT_VAL"  => "dblTDMarketVal";
+		column DPSED."DPSED_TD_LOAN_VAL" => "dblTDLoanVal";
+		column DPSED."DPSED_TD_REQ_MGN"  => "dblTDReqMgn";
+		column DPSED."DPSED_TD_REQ_SEC"  => "dblTDReqSec";
+		column DPSED."DPSED_VD_MKT_VAL"  => "dblVDMarketVal";
+		column DPSED."DPSED_VD_LOAN_VAL" => "dblVDLoanVal";
+		column DPSED."DPSED_VD_REQ_MGN"  => "dblVDReqMgn";
+		column DPSED."DPSED_VD_REQ_SEC"  => "dblVDReqSec";
+		column DPSED."DPSED_CURR_VD_BAL" => "dblVDBal";
+		column DPSED."DPSED_CURR_TD_BAL" => "dblTDBal";
+	}
+	
+}
+
+
+format SP399CRM
+// Defines the output format for the SP399 Daily Reconciliation File
+// Added August 2015
+{
+	output DPSDT to "recon.txt"
+	{
+		file ProcessingDate     => "dteProcessDate";
+		column DPSDT.DPSDT51	=> "txtAcctNo";
+		column DPSDT.DPSDT54	=> "txtSecId";
+		column DPSDT.DPSDT12	=> "booQtyValid";
+		column DPSDT.DPSDT15	=> "booAmtValid";
+		column DPSDT.DPSDT39	=> "dblQuantity";
+		column DPSDT.DPSDT42	=> "dblAmount";
+		column DPSDT.TXN_BV_MV_IND	=> "txtBVtoMV";
+	}
+	output DPSED to "dlyeval.txt"
+	{
+		file ProcessingDate              => "dteProcessDate";
+		column DPSDT.DPSDT51	         => "txtAcctNo";
+		column DPSED."DPSED_TD_MKT_VAL"  => "dblTDMarketVal";
+		column DPSED."DPSED_TD_LOAN_VAL" => "dblTDLoanVal";
+		column DPSED."DPSED_TD_REQ_MGN"  => "dblTDReqMgn";
+		column DPSED."DPSED_TD_REQ_SEC"  => "dblTDReqSec";
+		column DPSED."DPSED_VD_MKT_VAL"  => "dblVDMarketVal";
+		column DPSED."DPSED_VD_LOAN_VAL" => "dblVDLoanVal";
+		column DPSED."DPSED_VD_REQ_MGN"  => "dblVDReqMgn";
+		column DPSED."DPSED_VD_REQ_SEC"  => "dblVDReqSec";
+		column DPSED."DPSED_CURR_VD_BAL" => "dblVDBal";
+	}
+	
+}                          
+                          
+format SD700
+// Defines the output format for the SD700 Security Master file
+
+{
+	output DSDRT to "sec.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDRT.DSDRT06	=> "txtSecType";
+		column DSDRT.DSDRT09	=> "txtSecClass";
+		column DSDRT.DSDRT12	=> "txtSecDescE";
+		column DSDRT.DSDRT15	=> "txtSecDescF";
+		column DSDRT.DSDRT18	=> "txtCurrency";
+		column DSDRT.DSDRT21	=> "lngPayFreq";
+		column DSDRT.DSDRT22	=> "sglPayRate";
+		column DSDRT.DSDRT24	=> "lngFraction";
+		column DSDRT.DSDRT27	=> "dteMaturity";
+		column DSDRT.DSDRT30	=> "txtCusip";
+		column DSDRT.DSDRT63	=> "txtSymbol";
+		column DSDRT.DSDRT54	=> "txtCountry";
+		column DSDRT."IND_ANN_DIV" => "sglAnnualDiv";
+
+	}
+	
+	output DSDRT to "secpr.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDRT.DSDRT39	=> "dteCADPriceDate";
+		column DSDRT.DSDRT31	=> "dblCADLowPrice";
+		column DSDRT.DSDRT32	=> "dblCADHighPrice";
+		column DSDRT.DSDRT33	=> "dblCADClosePrice";
+		column DSDRT.DSDRT36	=> "txtCADPriceSource";
+		column DSDRT.DSDRT48	=> "dteUSDPriceDate";
+		column DSDRT.DSDRT40	=> "dblUSDLowPrice";
+		column DSDRT.DSDRT41	=> "dblUSDHighPrice";
+		column DSDRT.DSDRT42	=> "dblUSDClosePrice";
+		column DSDRT.DSDRT45	=> "txtUSDPriceSource";	
+	}
+
+	output DSDBO to "bonds.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDBO.DSDBO01	=> "dteDatedDate";
+		column DSDBO.DSDBO03	=> "dteFirstCpn";
+		column DSDBO.DSDBO06	=> "dteNextCpn";
+		column DSDBO.DSDBO12	=> "txtBondType";
+	}
+
+	output DSDDI to "div.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDDI.DSDDI03	=> "dteRecordDate";
+		column DSDDI.DSDDI06	=> "sglDivRate";
+		column DSDDI.DSDDI09	=> "lngPayFreq";
+		column DSDDI.DSDDI12	=> "dtePayDate";
+		column DSDDI.DSDDI15	=> "txtDivCur";
+	}
+	output DSDPP to "prupdt.txt"
+	{
+		column DSDPP.DSDPP03	=> "txtSecId";
+		column DSDPP.DSDPP39	=> "dteCADPriceDate";
+		column DSDPP.DSDPP31	=> "dblCADLowPrice";
+		column DSDPP.DSDPP32	=> "dblCADHighPrice";
+		column DSDPP.DSDPP33	=> "dblCADClosePrice";
+		column DSDPP.DSDPP36	=> "txtCADPriceSource";
+		column DSDPP.DSDPP48	=> "dteUSDPriceDate";
+		column DSDPP.DSDPP40	=> "dblUSDLowPrice";
+		column DSDPP.DSDPP41	=> "dblUSDHighPrice";
+		column DSDPP.DSDPP42	=> "dblUSDClosePrice";
+		column DSDPP.DSDPP45	=> "txtUSDPriceSource";
+	}
+	output DSDSY to "symbols.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDSY."SYMBOL_ID" => "txtSymbolType";
+		column DSDSY.DSDSY43	=> "txtSymbol";
+		column DSDSY.DSDSY06	=> "txtCountry";
+		column DSDSY.DSDSY09	=> "txtMarket1";
+		column DSDSY.DSDSY12	=> "booMajorMkt1";
+		column DSDSY.DSDSY15	=> "txtMarket2";
+		column DSDSY.DSDSY18	=> "booMajorMkt2";
+		column DSDSY.DSDSY21	=> "txtMarket3";
+		column DSDSY.DSDSY24	=> "booMajorMkt3";
+		column DSDSY.DSDSY27	=> "txtMarket4";
+		column DSDSY.DSDSY30	=> "booMajorMkt4";
+		column DSDSY.DSDSY33	=> "txtMarket5";
+		column DSDSY.DSDSY36	=> "booMajorMkt5";
+		column DSDSY.DSDSY39	=> "txtMarket6";
+		column DSDSY.DSDSY42	=> "booMajorMkt6";
+	}
+	output DSDUM to "units.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDUM."EFFECTIVE_DATE" => "dteEffective";
+		column DSDUM."END_DATE"	=> "dteEndDate";
+		column DSDUM."UNIT_OF_MEASURE" => "dblUnitofMeas";
+		column DSDUM."REM_PRIN_FACT" => "dblPFactRem";
+	}
+
+}
+format SD700T80
+// Defines the output format for the T80-specific version of the SD700 Security Master file
+
+{
+	output DSDRT to "sec.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDRT.DSDRT06	=> "txtSecType";
+		column DSDRT.DSDRT09	=> "txtSecClass";
+		column DSDRT.DSDRT12	=> "txtSecDescE";
+		column DSDRT.DSDRT15	=> "txtSecDescF";
+		column DSDRT.DSDRT18	=> "txtCurrency";
+		column DSDRT.DSDRT21	=> "lngPayFreq";
+		column DSDRT.DSDRT22	=> "sglPayRate";
+		column DSDRT.DSDRT24	=> "lngFraction";
+		column DSDRT.DSDRT27	=> "dteMaturity";
+		column DSDRT.DSDRT30	=> "txtCusip";
+		column DSDRT.DSDRT63	=> "txtSymbol";
+		column DSDRT.DSDRT54	=> "txtCountry";
+		column DSDRT."IND_ANN_DIV" => "sglAnnualDiv";
+		column DSDRT."BBS_ELIG"	=> "booBBSEligInd";
+		column DSDRT."DTC_ELIG" => "booDTCEligInd";
+		column DSDRT."EUR_ELIG" => "booEuroclearEligInd";
+		column DSDRT."WCCC_ELIG" => "booWCCCEligInd";
+		column DSDRT."DCS_ELIG"	=> "booDCSEligInd";
+		column DSDRT."RRSP_ELIG" => "booRSPEligInd";
+		column DSDRT."FGN_CNT_ELIG" => "booFgnContentEligInd";
+		column DSDRT."FGN_CNT_EFFECT_DT" => "dteFgnContentEffDate";
+		column DSDRT."CCPC"	=> "booCCPCInd";
+		column DSDRT."STRIKE_PRICE" => "dblStrikePrice";
+		column DSDRT."CALL_DATE" => "dteCallDate";
+		column DSDRT."CONVERT_DATE" => "dteConversionDate";
+		column DSDRT."WTH_TX_IF" => "sglWithholdingTaxPct";
+		column DSDRT."SPEC_MGN_RATE" => "lngSpecialMgnRate";
+		column DSDRT."SPEC_INFO" => "txtSpecialInfo";
+		column DSDRT."ISIN"	=> "txtISIN";
+		column DSDRT."UND_SEC_NO" => "txtUnderlyingSecId";
+		column DSDRT."UND_CDN_PRICE" => "dblUnderlyingSecCADPrice";
+		column DSDRT."UND_US_PRICE" => "dblUnderlyingSecUSDPrice";
+		
+		
+		
+
+	}
+	
+	output DSDRT to "secpr.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDRT.DSDRT39	=> "dteCADPriceDate";
+		column DSDRT.DSDRT31	=> "dblCADLowPrice";
+		column DSDRT.DSDRT32	=> "dblCADHighPrice";
+		column DSDRT.DSDRT33	=> "dblCADClosePrice";
+		column DSDRT.DSDRT36	=> "txtCADPriceSource";
+		column DSDRT.DSDRT48	=> "dteUSDPriceDate";
+		column DSDRT.DSDRT40	=> "dblUSDLowPrice";
+		column DSDRT.DSDRT41	=> "dblUSDHighPrice";
+		column DSDRT.DSDRT42	=> "dblUSDClosePrice";
+		column DSDRT.DSDRT45	=> "txtUSDPriceSource";	
+		column DSDRT.DSDRT57	=> "dblCADCloseBidAskPrice";
+		column DSDRT.DSDRT61	=> "dblUSDCloseBidAskPrice";
+	}
+
+	output DSDBO to "bonds.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDBO.DSDBO01	=> "dteDatedDate";
+		column DSDBO.DSDBO03	=> "dteFirstCpn";
+		column DSDBO.DSDBO06	=> "dteNextCpn";
+		column DSDBO.DSDBO12	=> "txtBondType";
+		column DSDBO."COMPOUND_IND" => "txtCompoundBondInd";
+		column DSDBO."INTEREST_RATE" => "dblInterestRate";
+		column DSDBO."FLOT_RT_ID" => "booFloatingRateInd";
+		column DSDBO."DATED_RT_IND" => "booUseDatedRatesInd";
+		column DSDBO."BOND_RT1"	=> "txtBondRating1";
+		column DSDBO."RAT_SRC1"	=> "txtRatingSrc1";
+		column DSDBO."BOND_RT2"	=> "txtBondRating2";
+		column DSDBO."RAT_SRC2"	=> "txtRatingSrc2";
+	}
+
+	output DSDDI to "div.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDDI.DSDDI03	=> "dteRecordDate";
+		column DSDDI.DSDDI06	=> "sglDivRate";
+		column DSDDI.DSDDI09	=> "lngPayFreq";
+		column DSDDI.DSDDI12	=> "dtePayDate";
+		column DSDDI.DSDDI15	=> "txtDivCur";
+		column DSDDI."EX_DIV_DT" => "dteExDivDate";
+	}
+	output DSDPP to "prupdt.txt"
+	{
+		column DSDPP.DSDPP03	=> "txtSecId";
+		column DSDPP.DSDPP39	=> "dteCADPriceDate";
+		column DSDPP.DSDPP31	=> "dblCADLowPrice";
+		column DSDPP.DSDPP32	=> "dblCADHighPrice";
+		column DSDPP.DSDPP33	=> "dblCADClosePrice";
+		column DSDPP.DSDPP36	=> "txtCADPriceSource";
+		column DSDPP.DSDPP48	=> "dteUSDPriceDate";
+		column DSDPP.DSDPP40	=> "dblUSDLowPrice";
+		column DSDPP.DSDPP41	=> "dblUSDHighPrice";
+		column DSDPP.DSDPP42	=> "dblUSDClosePrice";
+		column DSDPP.DSDPP45	=> "txtUSDPriceSource";
+	}
+	output DSDSY to "symbols.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDSY."SYMBOL_ID" => "txtSymbolType";
+		column DSDSY.DSDSY43	=> "txtSymbol";
+		column DSDSY.DSDSY06	=> "txtCountry";
+		column DSDSY.DSDSY09	=> "txtMarket1";
+		column DSDSY.DSDSY12	=> "booMajorMkt1";
+		column DSDSY.DSDSY15	=> "txtMarket2";
+		column DSDSY.DSDSY18	=> "booMajorMkt2";
+		column DSDSY.DSDSY21	=> "txtMarket3";
+		column DSDSY.DSDSY24	=> "booMajorMkt3";
+		column DSDSY.DSDSY27	=> "txtMarket4";
+		column DSDSY.DSDSY30	=> "booMajorMkt4";
+		column DSDSY.DSDSY33	=> "txtMarket5";
+		column DSDSY.DSDSY36	=> "booMajorMkt5";
+		column DSDSY.DSDSY39	=> "txtMarket6";
+		column DSDSY.DSDSY42	=> "booMajorMkt6";
+	}
+	output DSDUM to "units.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDUM."EFFECTIVE_DATE" => "dteEffective";
+		column DSDUM."END_DATE"	=> "dteEndDate";
+		column DSDUM."UNIT_OF_MEASURE" => "dblUnitofMeas";
+		column DSDUM."REM_PRIN_FACT" => "dblPFactRem";
+		column DSDUM."MULT_DIV_IND" => "txtMultDivInd";
+		column DSDUM."DATED_INT_RATE" => "dblDatedIntRate";
+	}
+
+}
+
+format SD700PR1
+// Defines the output format for the new "standardized" version of the SD700 Security Master file
+
+{
+	output DSDRT to "sec.txt"
+	{
+		column DSDRT.DSDRT03	  => "txtSecId";
+		column DSDRT.DSDRT06	  => "txtSecType";
+		column DSDRT.DSDRT09	  => "txtSecClass";
+		column DSDRT.DSDRT12	  => "txtSecDescE";
+		column DSDRT.DSDRT15	  => "txtSecDescF";
+		column DSDRT.DSDRT18	  => "txtCurrency";
+		column DSDRT.DSDRT21	  => "lngPayFreq";
+		column DSDRT.DSDRT22	  => "sglPayRate";
+		column DSDRT.DSDRT24	  => "lngFraction";
+		column DSDRT.DSDRT27	  => "dteMaturity";
+		column DSDRT.DSDRT30	  => "txtCusip";
+		column DSDRT.DSDRT63	  => "txtSymbol";
+		column DSDRT.DSDRT54	  => "txtCountry";
+		column DSDRT."IND_ANN_DIV" => "sglAnnualDiv";
+		column DSDRT."BBS_ELIG"	  => "booBBSEligInd";
+		column DSDRT."DTC_ELIG"   => "booDTCEligInd";
+		column DSDRT."EUR_ELIG"   => "booEuroclearEligInd";
+		column DSDRT."WCCC_ELIG"  => "booWCCCEligInd";
+		column DSDRT."DCS_ELIG"	  => "booDCSEligInd";
+		column DSDRT."RRSP_ELIG"  => "booRSPEligInd";
+		column DSDRT."RRSP_KNOWN" => "booRRSPKnownInd";
+		column DSDRT."FGN_CNT_ELIG" => "booFgnContentEligInd";
+		column DSDRT."FGN_CNT_EFFECT_DT" => "dteFgnContentEffDate";
+		column DSDRT."CCPC"	  => "booCCPCInd";
+		column DSDRT."STRIKE_PRICE" => "dblStrikePrice";
+		column DSDRT."CALL_DATE"  => "dteCallDate";
+		column DSDRT."CONVERT_DATE" => "dteConversionDate";
+		column DSDRT."WTH_TX_IF"  => "txtWithholdingTaxPct";
+		column DSDRT."SPEC_MGN_RATE" => "lngSpecialMgnRate";
+		column DSDRT."SPEC_INFO"  => "txtSpecialInfo";
+		column DSDRT."ISIN"	  => "txtISIN";
+		column DSDRT."UND_SEC_NO" => "txtUnderlyingSecId";
+		column DSDRT."CAD_UND_PRC" => "dblUnderlyingSecCADPrice";
+		column DSDRT."USD_UND_PRC" => "dblUnderlyingSecUSDPrice";
+		column DSDRT."LONG_ENGLISH_DESC" => "txtLongEnglishDesc";
+		column DSDRT."LONG_FRENCH_DESC" => "txtLongFrenchDesc";
+		column DSDRT."PICKUP_DT"  => "dtePickupDate";
+		column DSDRT."LST_UPD_DT" => "dteLastUpdate";		
+
+	}
+	
+	
+	output DSDRT to "secpr.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDRT.CAD_PRC_EFF_DTE	=> "dteCADPriceDate";
+		column DSDRT.CAD_BID_PRC	=> "dblCADLowPrice";
+		column DSDRT.CAD_ASK_PRC	=> "dblCADHighPrice";
+		column DSDRT.CAD_CLZ_PRC	=> "dblCADClosePrice";
+		column DSDRT.CAD_PRC_SRC	=> "txtCADPriceSource";
+		column DSDRT.USD_PRC_EFF_DTE	=> "dteUSDPriceDate";
+		column DSDRT.USD_BID_PRC	=> "dblUSDLowPrice";
+		column DSDRT.USD_ASK_PRC	=> "dblUSDHighPrice";
+		column DSDRT.USD_CLZ_PRC	=> "dblUSDClosePrice";
+		column DSDRT.USD_PRC_SRC	=> "txtUSDPriceSource";	
+		column DSDRT."CAD_CLZ_BID_ASK"	=> "dblCADCloseBidAskPrice";
+		column DSDRT."USD_CLZ_BID_ASK"	=> "dblUSDCloseBidAskPrice";
+	}
+	
+	
+	output DSDBO to "bonds.txt"
+	{
+		column DSDRT.DSDRT03	  => "txtSecId";
+		column DSDBO.DSDBO01	  => "dteDatedDate";
+		column DSDBO.DSDBO03	  => "dteFirstCpn";
+		column DSDBO.DSDBO06	  => "dteNextCpn";
+		column DSDBO.DSDBO12	  => "txtBondType";
+		column DSDBO."COMPOUND_IND" => "txtCompoundBondInd";
+		column DSDBO."INTEREST_RATE" => "dblInterestRate";
+		column DSDBO."FLOT_RT_ID" => "booFloatingRateInd";
+		column DSDBO."DATED_RT_IND" => "booUseDatedRatesInd";
+		column DSDBO."BOND_RT1"	  => "txtBondRating1";
+		column DSDBO."RAT_SRC1"	  => "txtRatingSrc1";
+		column DSDBO."BOND_RT2"	  => "txtBondRating2";
+		column DSDBO."RAT_SRC2"	  => "txtRatingSrc2";
+		column DSDBO."CPN_DT2"    => "txtCouponDate2";
+		column DSDBO."CPN_DT3"    => "txtCouponDate3";
+		column DSDBO."CPN_DT4"    => "txtCouponDate4";
+		column DSDBO."REG_ST_CD"  => "txtRegistrationStatus";
+		
+	} 
+
+	output DSDDI to "div.txt"
+	{
+		column DSDRT.DSDRT03	  => "txtSecId";
+		column DSDDI.DSDDI03	  => "dteRecordDate";
+		column DSDDI.DSDDI06	  => "sglDivRate";
+		column DSDDI.DSDDI09	  => "lngPayFreq";
+		column DSDDI.DSDDI12  	  => "dtePayDate";
+		column DSDDI.DSDDI15	  => "txtDivCur";
+		column DSDDI."EX_DIV_DT"  => "dteExDivDate";
+		column DSDDI."DIST_IDEN"  => "txtDistributionActivity";
+		column DSDDI."SHRS_P_SHB" => "dblSharesPerShareBase";
+		column DSDDI."SHR_BASE"   => "dblShareBase";
+		column DSDDI."OPT_PYM_MT" => "txtOptPayMethod";
+		column DSDDI."FC_SHR_CRE" => "txtFracShareCreate";
+		column DSDDI."FCT_VAL"    => "dblFractionValue";
+		column DSDDI."IBM_NO"     => "txtIBMSecId";
+		column DSDDI."SEQ_CD"     => "txtSequenceCode";
+		column DSDDI."DIST_SRC"   => "txtDistributionSrc";
+		column DSDDI."OMT_DIV_DT" => "dteOmittedDivDate";
+		column DSDDI."WTH_TX"  => "txtWithholdingTaxInfo";
+		column DSDDI."PYM_TY_CD"  => "txtPaymentTypeCode";
+		column DSDDI."ANT_PYM_FQ" => "dblAnticipPayFreq";
+		column DSDDI."DIST_DESC"  => "txtDistributionDesc";
+		column DSDDI."REMOVE_SEC_POS" => "booRemoveSecPos";
+		column DSDDI."DEEMED_VALUE" => "dblDeemedValue";
+		column DSDDI."PRIN_FACT"  => "dblPrincipalFactor";
+		column DSDDI."INT_FACT"   => "dblInterestFactor";
+	}
+	output DSDPP to "prupdt.txt"
+	{
+		column DSDPP.DSDPP03	=> "txtSecId";
+		column DSDPP.CAD_PRC_EFF_DTE	=> "dteCADPriceDate";
+		column DSDPP.CAD_BID_PRC	=> "dblCADLowPrice";
+		column DSDPP.CAD_ASK_PRC	=> "dblCADHighPrice";
+		column DSDPP.CAD_CLZ_PRC	=> "dblCADClosePrice";
+		column DSDPP.CAD_PRC_SRC	=> "txtCADPriceSource";
+		column DSDPP.USD_PRC_EFF_DTE	=> "dteUSDPriceDate";
+		column DSDPP.USD_BID_PRC	=> "dblUSDLowPrice";
+		column DSDPP.USD_ASK_PRC	=> "dblUSDHighPrice";
+		column DSDPP.USD_CLZ_PRC	=> "dblUSDClosePrice";
+		column DSDPP.USD_PRC_SRC	=> "txtUSDPriceSource";
+	}
+	output DSDSY to "symbols.txt"
+	{
+		column DSDRT.DSDRT03	=> "txtSecId";
+		column DSDSY."SYMBOL_ID" => "txtSymbolType";
+		column DSDSY.DSDSY43	=> "txtSymbol";
+		column DSDSY.DSDSY06	=> "txtCountry";
+		column DSDSY.DSDSY09	=> "txtMarket1";
+		column DSDSY.DSDSY12	=> "booMajorMkt1";
+		column DSDSY.DSDSY15	=> "txtMarket2";
+		column DSDSY.DSDSY18	=> "booMajorMkt2";
+		column DSDSY.DSDSY21	=> "txtMarket3";
+		column DSDSY.DSDSY24	=> "booMajorMkt3";
+		column DSDSY.DSDSY27	=> "txtMarket4";
+		column DSDSY.DSDSY30	=> "booMajorMkt4";
+		column DSDSY.DSDSY33	=> "txtMarket5";
+		column DSDSY.DSDSY36	=> "booMajorMkt5";
+		column DSDSY.DSDSY39	=> "txtMarket6";
+		column DSDSY.DSDSY42	=> "booMajorMkt6";
+	}
+	output DSDUM to "units.txt"
+	{
+		column DSDPP.DSDPP03	=> "txtSecId";
+		column DSDUM."EFFECTIVE_DATE" => "dteEffective";
+		column DSDUM."END_DATE"	=> "dteEndDate";
+		column DSDUM."UNIT_OF_MEASURE" => "dblUnitofMeas";
+		column DSDUM."REM_PRIN_FACT" => "dblPFactRem";
+		column DSDUM."MULT_DIV_IND" => "txtMultDivInd";
+		column DSDUM."DATED_INT_RATE" => "dblDatedIntRate";
+	}
+	
+	output DSNDP to "dsndp.txt"
+	{
+		column DSDPP.DSDPP03	=> "txtSecId";
+		column DSNDP.PRO_DTE	=> "dteProcess";
+		column DSNDP.BKR_ID	=> "txtBroker";
+		column DSNDP.EFF_DTE	=> "dteEffective";
+		column DSNDP.EXP_DTE	=> "dteExpiry";
+		column DSNDP.RBG_ID	=> "txtBrokerID";
+		column DSNDP.NDP_IND	=> "txtIndicator";
+		column DSNDP.BKR_OVR_IND	=> "txtOverride";
+		column DSNDP.AUD_USR_ID	=> "txtAudit";
+	}
+
+}
+        
+format BV399A
+{       
+        output BVSEC to "SecBookVal.txt"
+        {
+                column BVSEC."ACT_ID"             => "Account Number";           
+                column BVSEC."FI_ID"              => "Instrument ID";           
+                column BVSEC."RSP_ELG_IND"        => "RRSP eligible Y/N?";       
+                column BVSEC."FGN_CTT_IND"        => "Foreign content Y/N?";
+                column BVSEC."POS_COS_QTY"        => "Position cost QTY";     
+                column BVSEC."POS_BV"             => "Position book value";     
+                column BVSEC."PRO_DTE"            => "Date last updated";       
+                column BVSEC."POS_SUS_IND"        => "Position Suspect Ind";
+                       
+         }
+         
+         output BVACC to "ActSummBookVal.txt"
+         {
+                column BVACC.ACCT         => "Account Number";
+                column BVACC."PLN_ID"      => "Plan ID";
+                column BVACC."ACT_BV_AMT"  => "Acct Book Value Amt";
+                column BVACC."ACT_CSH_AMT" => "Acct Cash Amt";
+                column BVACC."ACT_FGN_PCT" => "Acct Pct Foreign";
+                column BVACC.RR           => "RR Code";
+         }
+          
+}        

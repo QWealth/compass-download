@@ -1,13 +1,24 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from os import path, environ
+from os import path, environ, makedirs
 import time
 
-if __name__ == "__main__":
+
+def get_file_from_compass():
+    """
+    Downloads a file from the NBCN Compass system.
+    Requires environment variables 'username' and 'password' to be set.
+    """
+    if 'username' not in environ or 'password' not in environ:
+        raise EnvironmentError("Environment variables 'username' and 'password' must be set.")
+    
     download_dir = path.abspath("downloads")
+    if not path.exists(download_dir):
+        makedirs(download_dir)
 
     options = Options()
     options.set_preference("browser.download.folderList", 2)  # custom dir
@@ -29,3 +40,20 @@ if __name__ == "__main__":
 
     finally:
         driver.quit()
+
+
+def get_last_downloaded_file(download_dir):
+    """
+    Returns the name of the most recently downloaded file in the specified directory.
+    """
+    files = [os.path.join(download_dir, f) for f in os.listdir(download_dir)]
+    if not files:
+        return None  # No files in the directory
+
+    # Get the file with the latest modification time
+    latest_file = max(files, key=os.path.getmtime)
+    return os.path.basename(latest_file)
+
+
+if __name__ == "__main__":
+    get_file_from_compass()
