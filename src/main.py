@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
         engine = get_mysql_engine_from_env()
         s, f = upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engine=engine)
-        send_alert(f'{s}, {f}')
+        send_alert(f'SUCCESS: {"\n".join(s)}, \nFAILED: {"\n".join(f)}')
 
     except FileNotFoundError:
         send_alert('Files not found.')
