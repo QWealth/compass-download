@@ -9,11 +9,18 @@ def get_mysql_engine_from_env(echo=False, pool_pre_ping=True):
     Raises:
       EnvironmentError if required env vars are missing.
     """
-    user = os.getenv("DB_USER")
-    password = os.getenv("DB_PASS")
-    host = os.getenv("DB_HOST", "localhost")
+    passwords = {
+        "password": "Wmd5DtejL00Yo7vcOKcQKCf0EyQltGPP",
+        "engine": "mysql",
+        "port": 3306,
+        "dbInstanceIdentifier": "fundfactsbackend-fundfactdatabasefe4a77b3-w1biyycw11sr",
+        "host": "fundfactsbackend-fundfactdatabasefe4a77b3-w1biyycw11sr.criwycoituxs.ca-central-1.rds.amazonaws.com"
+    }
+    user = os.getenv("DB_USER", 'admin')
+    password = os.getenv("DB_PASS", passwords["password"])
+    host = os.getenv("DB_HOST", passwords["host"])
     port = os.getenv("DB_PORT", "3306")
-    db = os.getenv("DB_NAME")
+    db = os.getenv("DB_NAME", "default")
 
     if not all([user, password, db]):
         raise EnvironmentError(
