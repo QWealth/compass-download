@@ -10,7 +10,25 @@ from upload_out_to_db import DEFAULT_OUT_DIR, upload_all_csvs
 downloads, unzips and deciphers the latest file from the NBIN Compass system.
 """
 
+from datetime import date, timedelta
+
+def was_yesterday_weekend() -> bool:
+    yesterday = date.today() - timedelta(days=1)
+    return yesterday.weekday() >= 5
+
+def format_successes(successes):
+    if not successes:
+        return "No files were uploaded successfully."
+    lines = []
+    for fname, table, num_records in successes:
+        lines.append(f"- {fname} → {table} ({num_records} records)")
+    return "\n".join(lines)
+
 if __name__ == "__main__":
+    if was_yesterday_weekend():
+        send_alert('yesterday was weekend.')
+        exit()
+
     try:
         zip_and_archive()
         get_file_from_compass()
@@ -20,7 +38,10 @@ if __name__ == "__main__":
 
         engine = get_mysql_engine_from_env()
         s, f = upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engine=engine)
-        send_alert(f'SUCCESS: {"\n".join(s)}, \nFAILED: {"\n".join(f)}')
+        send_alert(format_successes(s))
+        if len(f):
+            send_alert(str(f))
+
 
     except FileNotFoundError:
         send_alert('Files not found.')

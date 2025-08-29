@@ -98,5 +98,8 @@ if __name__ == "__main__":
 
     out_dir = DEFAULT_OUT_DIR
     s, f = upload_all_csvs(out_dir=out_dir, engine=engine)
+
+    
+
     print("Successes:", s)
     print("Failures:", f)
