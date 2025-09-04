@@ -12,9 +12,11 @@ downloads, unzips and deciphers the latest file from the NBIN Compass system.
 
 from datetime import date, timedelta
 
+
 def was_yesterday_weekend() -> bool:
     yesterday = date.today() - timedelta(days=1)
     return yesterday.weekday() >= 5
+
 
 def format_successes(successes):
     if not successes:
@@ -23,6 +25,7 @@ def format_successes(successes):
     for fname, table, num_records in successes:
         lines.append(f"- {fname} → {table} ({num_records} records)")
     return "\n".join(lines)
+
 
 if __name__ == "__main__":
     if was_yesterday_weekend():
@@ -41,7 +44,6 @@ if __name__ == "__main__":
         send_alert(format_successes(s))
         if len(f):
             send_alert(str(f))
-
 
     except FileNotFoundError:
         send_alert('Files not found.')

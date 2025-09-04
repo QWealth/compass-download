@@ -1,6 +1,7 @@
 import os
 from sqlalchemy import create_engine
 
+
 def get_mysql_engine_from_env(echo=False, pool_pre_ping=True):
     """
     Create and return a SQLAlchemy engine for MySQL using environment variables:
@@ -31,6 +32,7 @@ def get_mysql_engine_from_env(echo=False, pool_pre_ping=True):
     url = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset=utf8mb4"
     engine = create_engine(url, echo=echo, pool_pre_ping=pool_pre_ping)
     return engine
+
 
 def get_engine_from_url(url, echo=False, pool_pre_ping=True):
     """Create engine from a full SQLAlchemy URL."""
