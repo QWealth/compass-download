@@ -4,3 +4,4 @@ aws ec2 get-password-data \
   --query 'PasswordData' \
   --output text
 
+

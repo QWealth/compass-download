@@ -28,8 +28,16 @@ def get_mysql_engine_from_env(echo=False, pool_pre_ping=True):
             "DB_USER, DB_PASS and DB_NAME environment variables must be set"
         )
 
-    # Uses pymysql driver; ensure 'pymysql' is installed in the environment
     url = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset=utf8mb4"
+    engine = create_engine(url, echo=echo, pool_pre_ping=pool_pre_ping)
+    return engine
+
+
+def get_qc_engine(echo=False, pool_pre_ping=True):
+    host = "qw-production.criwycoituxs.ca-central-1.rds.amazonaws.com"
+    port = os.getenv("DB_PORT", "3306")
+    db = os.getenv("DB_NAME", 'nbinDataFeed')
+    url = f"mysql+pymysql://thomas:9g?XAd5&xiLi@{host}:{port}/{db}"
     engine = create_engine(url, echo=echo, pool_pre_ping=pool_pre_ping)
     return engine
 

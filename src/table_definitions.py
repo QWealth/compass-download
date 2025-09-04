@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy import Column, Integer, DateTime, String, Numeric, Date, func
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -9,7 +7,7 @@ Base = declarative_base()
 class Clients(Base):
     __tablename__ = 'CabFileAPClients'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     txtActionCode = Column(String(1))
     txtClientId = Column(String(20))
@@ -46,7 +44,8 @@ class Clients(Base):
 class Acclts(Base):
     __tablename__ = 'CabFileAPAcclts'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
+
     txtClientId = Column(String(20))
     txtAcctNo = Column(String(7))
 
@@ -54,7 +53,7 @@ class Acclts(Base):
 class Accts(Base):
     __tablename__ = 'CabFileAPAccts'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     txtAcctNo = Column(String(7))
     txtAcctType = Column(String(3))
     txtAcctCur = Column(String(3))
@@ -69,7 +68,7 @@ class Accts(Base):
 class Actpln(Base):
     __tablename__ = 'CabFileAPActpln'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     txtAcctNo = Column(String(7))
     txtPensionOrigin = Column(String(2))
 
@@ -77,7 +76,7 @@ class Actpln(Base):
 class Externid(Base):
     __tablename__ = 'CabFileAPExternid'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     txtAcctNo = Column(String(7))
     txtExtrnSys = Column(String(8))
     txtExtrnSubSys = Column(String(8))
@@ -87,7 +86,7 @@ class Externid(Base):
 class Payments(Base):
     __tablename__ = 'CabFileAPIPayments'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     txtAcctNo = Column(String(7))
     txtInstitution = Column(Integer)
     txtBankBranch = Column(Integer)
@@ -98,7 +97,7 @@ class Payments(Base):
 class Posdt(Base):
     __tablename__ = 'CabFileTPosdt'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     intSeqNo = Column(Integer)
     txtAcctNo = Column(String(7))
     txtSecId = Column(String(6))
@@ -122,7 +121,7 @@ class Posdt(Base):
 class Posli(Base):
     __tablename__ = 'CabFileTPosli'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     intSeqNo = Column(Integer)
     dteProcessDate = Column(Integer)
     txtLIType = Column(String(2))
@@ -133,7 +132,7 @@ class Posli(Base):
 class Postd(Base):
     __tablename__ = 'CabFileTPostd'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     intSeqNo = Column(Integer)
     dteProcessDate = Column(Integer)
     txtMarket = Column(String(2))
@@ -159,7 +158,7 @@ class Postd(Base):
 class Multfill(Base):
     __tablename__ = 'CabFileTMultifill'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     intSeqNo = Column(Integer)
     dteProcessDate = Column(Integer)
     txtTradeNumber = Column(String(6))
@@ -171,7 +170,7 @@ class Multfill(Base):
 class Postl(Base):
     __tablename__ = 'CabFileTPostl'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
     intSeqNo = Column(Integer)
     dteProcessDate = Column(Integer)
     txtTrailer = Column(String(25))
@@ -180,7 +179,7 @@ class Postl(Base):
 class Prupdt(Base):
     __tablename__ = 'CabFilePrupdt'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     txtSecId = Column(String(20), primary_key=True)  # e.g. A03AN1
     dteCADPriceDate = Column(Date, nullable=True)
@@ -198,7 +197,7 @@ class Prupdt(Base):
 
 class Dlyeval(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileCSRDlyeval'
     dteProcessDate = Column(Integer)
@@ -217,7 +216,7 @@ class Dlyeval(Base):
 class Recon(Base):
     __tablename__ = 'CabFileCSRRecon'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     dteProcessDate = Column(Integer)
     txtAcctNo = Column(String(7))
@@ -231,7 +230,7 @@ class Recon(Base):
 
 class Actsummbookval(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileBVActsummbookval'
     account_number = Column('Account Number', String(7))
@@ -244,7 +243,7 @@ class Actsummbookval(Base):
 
 class Secbookval(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileBVSecbookval'
     account_number = Column('Account Number', String(7))
@@ -259,7 +258,7 @@ class Secbookval(Base):
 
 class Sec(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabfileSMSec'
     lngSpecialMgnRate = Column(String(6))
@@ -304,7 +303,7 @@ class Sec(Base):
 
 class Secpr(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileSMSecpr'
     txtSecId = Column(String(6))
@@ -325,7 +324,7 @@ class Secpr(Base):
 class Symbols(Base):
     __tablename__ = 'CabFileSMSymbols'
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     BooMajorMkt1 = Column(String(1))
     BooMajorMkt2 = Column(String(1))
@@ -352,7 +351,7 @@ class Symbols(Base):
 
 class Bonds(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileSMBonds'
     txtSecId = Column(String(6))
@@ -376,7 +375,7 @@ class Bonds(Base):
 
 class Units(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileSMUnits'
     txtSecId = Column(String(6))
@@ -390,7 +389,7 @@ class Units(Base):
 
 class Div(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileSMDiv'
     txtSecId = Column(String(6))
@@ -423,7 +422,7 @@ class Div(Base):
 
 class Dsndp(Base):
     id = Column(Integer, primary_key=True)
-    uploadDate = Column(DateTime, server_default=func.now(), nullable=False)
+    uploadDate = Column(Date, nullable=False, server_default=func.curdate(), index=True)
 
     __tablename__ = 'CabFileSMDsndp'
     txtSecId = Column(String(6))
@@ -464,3 +463,16 @@ table_index = {
     "symbols": Symbols,
     "units": Units,
 }
+
+if __name__ == "__main__":
+    from db import get_mysql_engine_from_env, get_qc_engine
+
+    engine = get_mysql_engine_from_env(echo=True)
+    qc_engine = get_qc_engine(echo=True)
+
+    # print(qc_engine)
+
+    Base.metadata.create_all(qc_engine)
+    # Base.metadata.create_all(engine)
+
+    print("Tables created successfully.")

@@ -29,7 +29,7 @@ def remake_table(engine, table_name, model):
         model.__table__.create(engine, checkfirst=True)
 
 
-def upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engine=None, if_exists='replace', read_csv_kwargs=None):
+def upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engines: list[str]|None = None, if_exists='replace', read_csv_kwargs=None):
     """
     Upload every CSV (or TXT) from out_dir to MySQL using SQLAlchemy engine.
     Table name is derived from the filename.
@@ -45,7 +45,7 @@ def upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engine=None, if_exists='replace', r
       successes contain tuples (filename, table_name, num_records).
       failures contain tuples (filename, error).
     """
-    if engine is None:
+    if engines is None:
         engine = get_mysql_engine_from_env()
 
     if read_csv_kwargs is None:
@@ -76,8 +76,8 @@ def upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engine=None, if_exists='replace', r
         try:
             df = pd.read_csv(fpath, **read_csv_kwargs)
             num_records = len(df)
-
-            df.to_sql(table_name, con=engine, if_exists='append', index=False)
+            for e in engines or [engine]:
+                df.to_sql(table_name, con=e, if_exists='append', index=False)
 
             successes.append((fname, table_name, num_records))
             print(f"Uploaded {fname} -> {table_name} ({num_records} records)")

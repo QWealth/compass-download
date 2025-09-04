@@ -1,4 +1,4 @@
-from db import get_mysql_engine_from_env
+from db import get_mysql_engine_from_env, get_qc_engine
 from get_compass_file import get_file_from_compass, get_last_downloaded_file
 from process_compass import unzip_file, run_uff_for_all
 from setup import zip_and_archive
@@ -40,7 +40,8 @@ if __name__ == "__main__":
         run_uff_for_all()
 
         engine = get_mysql_engine_from_env()
-        s, f = upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engine=engine)
+        qc_engine = get_qc_engine()
+        s, f = upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engines=[engine, qc_engine])
         send_alert(format_successes(s))
         if len(f):
             send_alert(str(f))
