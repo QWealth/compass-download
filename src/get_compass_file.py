@@ -6,8 +6,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import sentry_sdk
 
 from constants import NBIN_URL, DOWNLOADS_FOLDER
+from observability import init_observability
 DOWNLOAD_DIR = path.abspath(DOWNLOADS_FOLDER)
 
 
@@ -22,6 +24,9 @@ def get_file_from_compass():
 
     if not path.exists(DOWNLOAD_DIR):
         makedirs(DOWNLOAD_DIR)
+
+    # Initialize Sentry (no-op if SENTRY_DSN not set)
+    init_observability(app_name="get_compass_file")
 
     options = Options()
     options.set_preference("browser.download.folderList", 2)
@@ -41,6 +46,9 @@ def get_file_from_compass():
         wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Logout"))).click()
         time.sleep(2)
 
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        raise
     finally:
         driver.quit()
 

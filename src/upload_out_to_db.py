@@ -3,9 +3,11 @@ from os import path
 import pandas as pd
 
 from sqlalchemy import inspect, text
+import sentry_sdk
 
 from db import get_mysql_engine_from_env
 from table_definitions import table_index
+from observability import init_observability
 
 DEFAULT_OUT_DIR = "C:/uff/out"
 # DEFAULT_OUT_DIR = '../test_files'
@@ -45,6 +47,9 @@ def upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engines: list[str]|None = None, if_
       successes contain tuples (filename, table_name, num_records).
       failures contain tuples (filename, error).
     """
+    # Initialize Sentry (no-op if SENTRY_DSN not set)
+    init_observability(app_name="upload_out_to_db")
+
     if engines is None:
         engine = get_mysql_engine_from_env()
 
@@ -82,6 +87,7 @@ def upload_all_csvs(out_dir=DEFAULT_OUT_DIR, engines: list[str]|None = None, if_
             successes.append((fname, table_name, num_records))
             print(f"Uploaded {fname} -> {table_name} ({num_records} records)")
         except Exception as exc:
+            sentry_sdk.capture_exception(exc)
             failures.append((fname, str(exc)))
             print(f"Failed to upload {fname}: {exc}")
 

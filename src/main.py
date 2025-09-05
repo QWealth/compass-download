@@ -4,6 +4,8 @@ from process_compass import unzip_file, run_uff_for_all
 from setup import zip_and_archive
 from slack_alert import send_alert
 from upload_out_to_db import DEFAULT_OUT_DIR, upload_all_csvs
+import sentry_sdk
+from observability import init_observability
 
 """
 
@@ -28,6 +30,7 @@ def format_successes(successes):
 
 
 if __name__ == "__main__":
+    init_observability(app_name="main")
     if was_yesterday_weekend():
         send_alert('yesterday was weekend.')
         exit()
@@ -46,9 +49,11 @@ if __name__ == "__main__":
         if len(f):
             send_alert(str(f))
 
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        sentry_sdk.capture_exception(e)
         send_alert('Files not found.')
 
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         send_alert(f':scream: {e}')
 
